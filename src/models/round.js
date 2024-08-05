@@ -7,7 +7,11 @@ const roundSchema = new Schema({
     ref: "Course",
     required: true,
   },
-  username: { type: String, required: true, minlength: 3, maxlength: 64 },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   scores: {
     type: [Number],
     required: true,

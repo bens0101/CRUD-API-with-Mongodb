@@ -6,6 +6,7 @@ exports.getAllRounds = async (req, res) => {
     const rounds = await roundService.getAllRounds();
     res.status(200).json({ data: rounds });
   } catch (error) {
+    console.error("Error in getAllRounds:", error); // Log the error
     res.status(500).json({ error: error.message });
   }
 };
@@ -24,11 +25,11 @@ exports.getRoundById = async (req, res) => {
 
 exports.createRound = async (req, res) => {
   try {
-    const { course, username, scores } = req.body;
+    const { course, user, scores } = req.body;
     if (!Array.isArray(scores) || scores.length !== 18) {
       res.status(400).json({ error: error.message });
     }
-    const round = await roundService.createRound({ course, username, scores });
+    const round = await roundService.createRound({ course, user, scores });
     res.status(201).json({ data: round });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -38,7 +39,7 @@ exports.createRound = async (req, res) => {
 exports.replaceRound = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { course, username, scores } = req.body;
+    const { course, user, scores } = req.body;
 
     if (!Array.isArray(scores) || scores.length !== 18) {
       throw new BadRequestError("Scores must be exactly 18 holes!");
@@ -46,7 +47,7 @@ exports.replaceRound = async (req, res, next) => {
 
     const updatedRound = await roundService.replaceRound(id, {
       course,
-      username,
+      user,
       scores,
     });
     if (!updatedRound) {

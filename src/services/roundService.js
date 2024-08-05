@@ -2,11 +2,11 @@ const Round = require("../models/round");
 const { NotFoundError } = require("../utils/errors");
 
 exports.getAllRounds = async () => {
-  return await Round.find().populate("course");
+  return await Round.find().populate("course").populate("user");
 };
 
 exports.getRoundById = async (id) => {
-  return await Round.findById(id).populate("course");
+  return await Round.findById(id).populate("course").populate("user");
 };
 
 exports.createRound = async (roundData) => {
@@ -18,7 +18,7 @@ exports.replaceRound = async (id, roundData) => {
   const roundUpdated = await Round.findByIdAndUpdate(id, roundData, {
     new: true,
     runValidators: true,
-  }).populate("course");
+  }).populate("course").populate("user");
   if (!roundUpdated) {
     throw new NotFoundError(`Round not found`);
   }
@@ -26,15 +26,13 @@ exports.replaceRound = async (id, roundData) => {
 };
 
 exports.updateRound = async (id, roundData) => {
-  return await Round.findByIdAndUpdate(id, roundData, { new: true }).populate(
-    "course"
-  );
+  return await Round.findByIdAndUpdate(id, roundData, { new: true }).populate("course").populate("user");
 };
 
 exports.deleteRound = async (id) => {
-  const response = await Round.findByIdAndDelete(id).populate("course");
+  const response = await Round.findByIdAndDelete(id).populate("course").populate("user");
   if (!response) {
-    throw new NotFoundError("round with id is not found");
+    throw new NotFoundError("Round with id is not found");
   }
   return response;
 };

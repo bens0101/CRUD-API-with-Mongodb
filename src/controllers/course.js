@@ -26,9 +26,14 @@ exports.getCourseById = async (req, res) => {
 
 exports.createCourse = async (req, res) => {
   try {
+    const { name, holes } = req.body;
+    if (!name || !holes || holes.length !== 18) {
+      throw new BadRequestError("Course must have a name and 18 holes.");
+    }
     const course = await courseService.createCourse(req.body);
     res.status(201).json({ data: course });
   } catch (error) {
+    console.error("Error in createCourse:", error);
     res.status(400).json({ error: error.message });
   }
 };
