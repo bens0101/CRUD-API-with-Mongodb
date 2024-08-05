@@ -1,14 +1,36 @@
-const express = require("express");
-const roundController = require("../controllers/rounds");
-const validateCourse = require("../middleware/validateCourse");
-const validateRoundId = require("../middleware/validateId");
-const router = express.Router();
+const { Router } = require("express");
 
-router.get("/", roundController.getAllRounds);
-router.post("/", roundController.createRound);
-router.get("/:id", validateRoundId, roundController.getRoundById);
-router.put("/:id", validateRoundId, roundController.replaceRound);
-router.patch("/:id", validateRoundId, roundController.updateRound);
-router.delete("/:id", validateRoundId, roundController.deleteRound);
+const roundsController = require("../controllers/rounds");
+const isValidObjectId = require("../middlewares/isValidObjectId");
 
-module.exports = router;
+const isAuthenticated = require("../middlewares/isAuthenticated");
+const RoundCheck = require("../middlewares/roundcheck");
+
+const roundsRouter = Router();
+
+roundsRouter.use(isAuthenticated);
+
+roundsRouter.get("/", roundsController.getAll);
+roundsRouter.post("/", roundsController.create);
+
+roundsRouter.get("/:id", isValidObjectId, RoundCheck, roundsController.getOne);
+roundsRouter.put(
+  "/:id",
+  isValidObjectId,
+  RoundCheck,
+  roundsController.replaceOne
+);
+roundsRouter.patch(
+  "/:id",
+  isValidObjectId,
+  RoundCheck,
+  roundsController.updateOne
+);
+roundsRouter.delete(
+  "/:id",
+  isValidObjectId,
+  RoundCheck,
+  roundsController.deleteOne
+);
+
+module.exports = roundsRouter;

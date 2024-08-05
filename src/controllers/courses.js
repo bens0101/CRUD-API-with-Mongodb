@@ -1,13 +1,13 @@
-const roundService = require("../services/rounds");
+const courseService = require("../services/courses");
 
 const create = async (req, res, next) => {
   try {
     // getting the data from the request
-    const newRound = await roundService.create(req.sanitizedBody, req.user._id);
+    const newCourse = await courseService.create(req.sanitizedBody);
 
     // send a response
     res.status(201).json({
-      data: newRound,
+      data: newCourse,
     });
   } catch (err) {
     next(err);
@@ -16,10 +16,10 @@ const create = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const rounds = await roundService.getAll();
+    const courses = await courseService.getAll();
 
     res.json({
-      data: rounds,
+      data: courses,
     });
   } catch (err) {
     next(err);
@@ -30,9 +30,9 @@ const getOne = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const round = await roundService.getById(id);
+    const course = await courseService.getById(id);
 
-    res.json({ data: round });
+    res.json({ data: course });
   } catch (err) {
     next(err);
   }
@@ -42,10 +42,10 @@ const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const updatedRound = await roundService.updateOne(id, req.sanitizedBody);
+    const updatedCourse = await courseService.updateOne(id, req.sanitizedBody);
 
     res.json({
-      data: updatedRound,
+      data: updatedCourse,
     });
   } catch (err) {
     next(err);
@@ -56,10 +56,10 @@ const replaceOne = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const replacedRound = await roundService.replaceOne(id, req.sanitizedBody);
+    const updatedCourse = await courseService.replaceOne(id, req.sanitizedBody);
 
     res.json({
-      data: replacedRound,
+      data: updatedCourse,
     });
   } catch (err) {
     next(err);
@@ -69,9 +69,9 @@ const replaceOne = async (req, res, next) => {
 const deleteOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedRound = await roundService.deleteOne(id);
+    const deletedCourse = await courseService.deleteOne(id);
     res.json({
-      data: deletedRound,
+      data: deletedCourse,
     });
   } catch (err) {
     next(err);

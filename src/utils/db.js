@@ -1,10 +1,11 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const logger = require('./logger');
 
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
-    console.log(`Server is running on port`);
+    logger.info('Connected to mongoose');
   })
-  .catch((error) => {
-    console.error("Database connection error:", error);
+  .catch((err) => {
+    logger.error('Error connecting to mongoose', err);
   });

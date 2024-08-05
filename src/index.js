@@ -1,34 +1,56 @@
-const express = require("express");
 require("dotenv/config");
+
+const compression = require("compression");
+const cors = require("cors");
+const express = require("express");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const sanitizeMongo = require("express-mongo-sanitize");
+
 require("./utils/db");
-const passport = require("passport");
-const courseRouter = require("./routers/courses");
-const roundRouter = require("./routers/rounds");
-const authRouter = require("./middleware/auth.js");
+require("./utils/passport");
+const sanitizeBody = require("./middlewares/sanitizeBody");
+const coursesRouter = require("./routers/courses");
+const roundsRouter = require("./routers/rounds");
+const authRouter = require("./routers/auth");
 const { errorHandler } = require("./utils/errors");
-const isAuthenticated = require("./middleware/isAuthenticated");
+const logger = require("./utils/logger");
 
 const app = express();
 
+// middleware
+app.use(cors("*"));
 app.use(express.json());
-app.use(passport.initialize());
+
+app.use(sanitizeMongo());
+app.use(sanitizeBody);
+
+app.use(
+  morgan("tiny", {
+    stream: { write: (message) => logger.info(message) },
+  })
+);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(compression());
+  app.use(helmet());
+}
+
 app.get("/", (_req, res) => {
   res.send("Server running 🚀🚀🚀");
 });
+
 app.use("/auth", authRouter);
-app.use("/api/courses", courseRouter);
-app.use("/api/rounds", roundRouter);
+app.use("/api/courses", coursesRouter);
+app.use("/api/rounds", roundsRouter);
+
+app.get("/login-success", (req, res) => {
+  res.send(`Your token is ${req.query.token}`);
+});
+
 app.use(errorHandler);
-
-app.get("/success", (_req, res) => {
-  res.send("Success");
-});
-
-app.get("/fail", (_req, res) => {
-  res.send("Fail");
-});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`App running on port ${PORT}`);
+  logger.info(`App running on port ${PORT}`);
 });

@@ -1,39 +1,65 @@
-"use strict";
-
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("../models/user");
+const { Strategy: LocalStrategy } = require("passport-local");
+const { Strategy: BearerStrategy } = require("passport-http-bearer");
+const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } = process.env;
+// TODO move bcrypt into a user service
+const bcrypt = require("bcrypt");
+
+const User = require("../models/user");
+const tokenService = require("../services/tokenService");
+
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } =
+  process.env;
 
 passport.use(
-  new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: GOOGLE_CALLBACK_URL,
-  },
-  async (_accessToken, _refreshToken, profile, cb) => {
+  new BearerStrategy(function (token, done) {
     try {
-      const user = await User.findOneAndUpdate(
-        { googleId: profile.id },
-        { $set: { name: profile.displayName, googleId: profile.id } },
-        { upsert: true, new: true }
-      );
-      return cb(null, user);
+      const user = tokenService.verifyToken(token);
+      if (!user) {
+        return done(null, false);
+      }
+      done(null, user);
     } catch (error) {
-      return cb(error);
+      done(error);
     }
   })
 );
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id);
-});
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      callbackURL: GOOGLE_CALLBACK_URL,
+    },
+    async (_accessToken, _refreshToken, profile, done) => {
+      const {
+        id: googleId,
+        name: { familyName, givenName },
+      } = profile;
 
-passport.deserializeUser((id, cb) => {
-  User.findById(id, (err, user) => {
-    cb(err, user);
-  });
-});
-
-module.exports = passport;
+      try {
+        const user = await User.findOneAndReplace(
+          {
+            googleId,
+          },
+          {
+            name: `${givenName}-${familyName}`,
+            googleId,
+            firstName: givenName,
+            lastName: familyName,
+          },
+          {
+            upsert: true,
+            new: true,
+            runValidators: true,
+          }
+        ).lean();
+        done(null, user);
+      } catch (err) {
+        done(err);
+      }
+    }
+  )
+);

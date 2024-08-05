@@ -1,18 +1,16 @@
-const express = require("express");
-const courseController = require("../controllers/course");
-const router = express.Router();
-const validateCourse = require("../middleware/validateCourse");
-const validateRoundId = require("../middleware/validateId");
+const { Router } = require("express");
 
-router.post("/", courseController.createCourse);
-router.get("/", courseController.getAllCourses);
-router.get("/:id", validateRoundId, courseController.getCourseById);
-router.put(
-  "/:id",
-  validateCourse,
-  validateRoundId,
-  courseController.replaceCourse
-);
-router.patch("/:id", validateRoundId, courseController.updateCourse);
-router.delete("/:id", validateRoundId, courseController.deleteCourse);
-module.exports = router;
+const coursesController = require("../controllers/courses");
+const isValidObjectId = require("../middlewares/isValidObjectId");
+
+const coursesRouter = Router();
+
+coursesRouter.get("/", coursesController.getAll);
+coursesRouter.get("/:id", isValidObjectId, coursesController.getOne);
+
+coursesRouter.post("/", coursesController.create);
+coursesRouter.put("/:id", isValidObjectId, coursesController.replaceOne);
+coursesRouter.patch("/:id", isValidObjectId, coursesController.updateOne);
+coursesRouter.delete("/:id", isValidObjectId, coursesController.deleteOne);
+
+module.exports = coursesRouter;

@@ -1,21 +1,24 @@
-"use strict";
-
 const { model, Schema } = require("mongoose");
 
-const UserSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 3,
-    maxlength: 64,
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 64,
+      unique: true,
+    },
+    googleId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
   },
-  googleId: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
-module.exports = model("User", UserSchema);
+module.exports = model("User", userSchema);
