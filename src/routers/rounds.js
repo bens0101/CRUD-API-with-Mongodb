@@ -11,4 +11,4 @@ router.put("/:id", validateRoundId, roundController.replaceRound);
 router.patch("/:id", validateRoundId, roundController.updateRound);
 router.delete("/:id", validateRoundId, roundController.deleteRound);
 
-module.exports = router;
+module.exports = router; 
